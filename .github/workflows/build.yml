@@ -22,11 +22,13 @@ jobs:
           sudo apt update
           sudo apt install -y zip unzip openjdk-17-jdk python3-pip git build-essential
           pip install --upgrade cython buildozer
+          
+          # Install Android SDK & Build Tools
+          yes | sdkmanager --licenses || true
+          sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "cmdline-tools;latest" || true
 
       - name: Build APK
         run: |
-          # buildozer init
-          # cp buildozer.spec ./  # overwrite default if generated
           buildozer android debug
 
       - name: Upload APK
