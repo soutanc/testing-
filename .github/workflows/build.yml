@@ -25,7 +25,7 @@ jobs:
 
       - name: Build APK
         run: |
-          buildozer init
+          # buildozer init
           cp buildozer.spec ./  # overwrite default if generated
           buildozer android debug
 
