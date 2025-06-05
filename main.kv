@@ -1,0 +1,134 @@
+<SubscriptionScreen>:
+    name: 'subscription'
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: 10
+        padding: 20
+        canvas.before:
+            Color:
+                rgba: 0.9, 0.95, 1, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Label:
+            text: 'Subscription'
+            font_size: '28sp'
+            color: 0, 0, 0.6, 1
+
+        Spinner:
+            id: name_spinner
+            text: 'Select Name'
+            values: ['Soutan','Anup','Nilanjan','Soumya','Apurba','Arpan','Kallal','Mithun','Joy','Hodu','Uttam','Indroj','Anindya','Pinaki','Raju da','Raju','Sudip']
+            size_hint_y: None
+            height: 50
+
+        TextInput:
+            id: amount_input
+            hint_text: 'Amount'
+            multiline: False
+            input_filter: 'float'
+            size_hint_y: None
+            height: 50
+
+        TextInput:
+            id: date_input
+            hint_text: 'Date'
+            multiline: False
+            size_hint_y: None
+            height: 50
+
+        Spinner:
+            id: purpose_spinner
+            text: 'Select Purpose'
+            values: ['Monthly','Others']
+            size_hint_y: None
+            height: 50
+
+        BoxLayout:
+            size_hint_y: None
+            height: 50
+            spacing: 10
+            Button:
+                text: 'Add'
+                background_color: 0.2, 0.7, 0.2, 1
+                on_release: root.add_data()
+            Button:
+                text: 'Total'
+                background_color: 0.1, 0.5, 0.9, 1
+                on_release: root.show_total()
+
+        Button:
+            text: 'Next'
+            background_color: 0.9, 0.5, 0.1, 1
+            size_hint_y: None
+            height: 50
+            on_release:
+                app.root.current = 'expenditure'
+
+
+<ExpenditureScreen>:
+    name: 'expenditure'
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: 10
+        padding: 20
+        canvas.before:
+            Color:
+                rgba: 1, 0.95, 0.9, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Label:
+            text: 'Expenditure'
+            font_size: '28sp'
+            color: 0.6, 0, 0, 1
+
+        TextInput:
+            id: ex_purpose
+            hint_text: 'Purpose'
+            multiline: False
+            size_hint_y: None
+            height: 50
+
+        TextInput:
+            id: ex_amount
+            hint_text: 'Amount'
+            input_filter: 'float'
+            multiline: False
+            size_hint_y: None
+            height: 50
+
+        TextInput:
+            id: ex_date
+            hint_text: 'Date'
+            multiline: False
+            size_hint_y: None
+            height: 50
+
+        BoxLayout:
+            size_hint_y: None
+            height: 50
+            spacing: 10
+            Button:
+                text: 'Add'
+                background_color: 0.2, 0.6, 0.2, 1
+                on_release: root.add_data()
+            Button:
+                text: 'Total'
+                background_color: 0.1, 0.4, 0.8, 1
+                on_release: root.show_total()
+
+        BoxLayout:
+            size_hint_y: None
+            height: 50
+            spacing: 10
+            Button:
+                text: 'Back'
+                background_color: 0.8, 0.8, 0.2, 1
+                on_release: app.root.current = 'subscription'
+            Button:
+                text: 'Exit'
+                background_color: 1, 0.2, 0.2, 1
+                on_release: root.exit_app()
