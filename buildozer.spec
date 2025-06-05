@@ -11,9 +11,9 @@ fullscreen = 0
 android.api = 33
 android.minapi = 21
 android.ndk = 25b
-android.arch = armeabi-v7a
+android.archs = armeabi-v7a
 android.permissions = INTERNET
-android.sdk = 24
+# android.sdk = 24
 android.ndk_path = 
 android.sdk_path = 
 # uncomment if you want to keep .db file
