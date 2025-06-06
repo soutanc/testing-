@@ -1,55 +1,55 @@
-name: Build Android APK
+name: Build Kivy APK
 
 on:
   push:
     branches:
       - main
-  pull_request:
 
 jobs:
-  build-android:
+  build:
     runs-on: ubuntu-latest
+
+    env:
+      ANDROID_HOME: ${{ runner.home }}/android-sdk
+      ANDROID_SDK_ROOT: ${{ runner.home }}/android-sdk
+      PATH: ${{ runner.home }}/android-sdk/cmdline-tools/latest/bin:${{ runner.home }}/android-sdk/platform-tools:$PATH
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Java (OpenJDK 11)
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 11
-
-      - name: Install Android SDK Command Line Tools
+      - name: Install dependencies and Buildozer
         run: |
-          mkdir -p $HOME/android-sdk/cmdline-tools
-          cd $HOME/android-sdk/cmdline-tools
+          sudo apt-get update
+          sudo apt-get install -y \
+            openjdk-11-jdk \
+            python3-pip \
+            python3-setuptools \
+            python3-wheel \
+            git \
+            zip \
+            unzip \
+            libffi-dev \
+            libssl-dev \
+            python3-dev \
+            build-essential \
+            autoconf automake libtool pkg-config
+          pip3 install --upgrade pip
+          pip3 install buildozer cython
+
+      - name: Setup Android SDK cmdline-tools
+        run: |
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          cd $ANDROID_HOME/cmdline-tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
           unzip cmdline-tools.zip
           rm cmdline-tools.zip
           mv cmdline-tools latest
 
-      - name: Set environment variables
+      - name: Accept Android licenses and install SDK packages
         run: |
-          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
-          echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
-          echo "$HOME/android-sdk/build-tools/33.0.2" >> $GITHUB_PATH
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME --licenses
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.1.8937393" "cmdline-tools;latest" "ndk-bundle" "platforms;android-21" "extras;android;m2repository" "extras;google;m2repository"
 
-      - name: Accept Android SDK licenses
-        run: |
-          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
-
-      - name: Install required Android SDK packages
-        run: |
-          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk "platform-tools" "build-tools;33.0.2" "platforms;android-33"
-
-      - name: Verify aidl tool
-        run: |
-          ls -l $HOME/android-sdk/build-tools/33.0.2/aidl
-          which aidl || echo "aidl not found in PATH"
-          aidl --help || echo "aidl command test failed"
-
-      - name: Build APK with Buildozer
-        run: |
-          buildozer android debug
+      - name: Run Buildozer build
+        run: buildozer android debug
