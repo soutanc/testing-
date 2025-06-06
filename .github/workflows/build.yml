@@ -18,27 +18,40 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install system tools (git, tar, etc.)
+      - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y git zip unzip tar wget openjdk-17-jdk python3-pip coreutils
-          echo "Verifying tar:"
-          which tar
-          tar --version
+          sudo apt install -y git zip unzip tar wget openjdk-17-jdk python3-pip build-essential
           pip install --upgrade pip setuptools wheel
           pip install cython buildozer
 
-      - name: Install Android SDK and Build Tools (includes AIDL) with verification
+      - name: Install Android SDK & Tools
         run: |
           export ANDROID_HOME=$HOME/android-sdk
           mkdir -p $ANDROID_HOME/cmdline-tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O sdk-tools.zip
           unzip sdk-tools.zip -d $ANDROID_HOME/cmdline-tools
           mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
-
-          export PATH=$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
-
+          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
           yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses
           sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "platforms;android-33" "build-tools;33.0.2"
 
-          echo "Installed packages:"
+      - name: Build APK with Buildozer
+        run: |
+          export ANDROID_HOME=$HOME/android-sdk
+          export PATH=$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/33.0.2:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+          buildozer android clean
+          buildozer android debug
+
+      - name: Find all APKs
+        run: |
+          echo "Looking for all APKs..."
+          find . -name "*.apk" -exec ls -lh {} \;
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: kivy-apk
+          path: |
+            bin/*.apk
+            .buildozer/android/platform/build/dists/**/build/outputs/apk/debug/*.apk
