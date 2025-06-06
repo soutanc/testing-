@@ -40,12 +40,18 @@ jobs:
         run: |
           export ANDROID_HOME=$HOME/android-sdk
           export PATH=$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/33.0.2:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+
+          # Clone python-for-android manually to avoid FileNotFoundError
+          mkdir -p .buildozer/android/platform/
+          git clone https://github.com/kivy/python-for-android.git .buildozer/android/platform/python-for-android
+
+          # Build the APK
           buildozer android clean
           buildozer android debug
 
       - name: Find all APKs
         run: |
-          echo "Looking for all APKs..."
+          echo "Looking for all APK files..."
           find . -name "*.apk" -exec ls -lh {} \;
 
       - name: Upload APK
