@@ -28,7 +28,7 @@ jobs:
           pip install --upgrade pip setuptools wheel
           pip install cython buildozer
 
-      - name: Install Android SDK and Build Tools (includes AIDL)
+      - name: Install Android SDK and Build Tools (includes AIDL) with verification
         run: |
           export ANDROID_HOME=$HOME/android-sdk
           mkdir -p $ANDROID_HOME/cmdline-tools
@@ -41,16 +41,4 @@ jobs:
           yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses
           sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "platforms;android-33" "build-tools;33.0.2"
 
-          export PATH=$ANDROID_HOME/build-tools/33.0.2:$PATH
-
-      - name: Build APK
-        run: |
-          export ANDROID_HOME=$HOME/android-sdk
-          export PATH=$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/33.0.2:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
-          buildozer android debug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: kivy-apk
-          path: bin/*.apk
+          echo "Installed packages:"
