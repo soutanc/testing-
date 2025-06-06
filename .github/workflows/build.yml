@@ -18,48 +18,26 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
           sudo apt update
-          sudo apt install -y git zip unzip tar wget openjdk-17-jdk python3-pip build-essential
-          pip install --upgrade pip setuptools wheel
-          pip install cython buildozer
-          # Required for python-for-android manually cloned version
-          pip install appdirs sh colorama
+          sudo apt install -y zip unzip openjdk-17-jdk python3-pip libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev libfreetype6-dev libgl1-mesa-dev libgles2-mesa-dev libmtdev-dev libffi-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libpng-dev libjpeg-dev libtiff-dev libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev
 
-      - name: Install Android SDK & Tools
+      - name: Install Python dependencies
         run: |
-          export ANDROID_HOME=$HOME/android-sdk
-          mkdir -p $ANDROID_HOME/cmdline-tools
-          wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O sdk-tools.zip
-          unzip sdk-tools.zip -d $ANDROID_HOME/cmdline-tools
-          mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
-          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
-          yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses
-          sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+          pip install --upgrade pip setuptools
+          pip install buildozer packaging
 
-      - name: Build APK with Buildozer
+      - name: Initialize buildozer.spec
         run: |
-          export ANDROID_HOME=$HOME/android-sdk
-          export PATH=$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/33.0.2:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+          test -f buildozer.spec || buildozer init
 
-          # Clone python-for-android manually to avoid FileNotFoundError
-          mkdir -p .buildozer/android/platform/
-          git clone https://github.com/kivy/python-for-android.git .buildozer/android/platform/python-for-android
-
-          # Build APK
-          buildozer android clean
+      - name: Build APK
+        run: |
           buildozer android debug
 
-      - name: Find all APKs
-        run: |
-          echo "Searching APKs..."
-          find . -name "*.apk" -exec ls -lh {} \;
-
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: kivy-apk
-          path: |
-            bin/*.apk
-            .buildozer/android/platform/build/dists/**/build/outputs/apk/debug/*.apk
+          path: bin/*.apk
