@@ -9,11 +9,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    env:
-      ANDROID_HOME: ${{ github.workspace }}/android-sdk
-      ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
-      PATH: "/bin:/usr/bin:${{ github.workspace }}/android-sdk/platform-tools:${{ github.workspace }}/android-sdk/cmdline-tools/latest/bin:$PATH"
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -23,28 +18,31 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install System Tools (Fixes: git, tar, aidl, etc.)
+      - name: Install System Tools (git, tar, aidl)
         run: |
           sudo apt update
           sudo apt install -y git zip unzip tar wget openjdk-17-jdk python3-pip coreutils
-          echo "Verifying tar install:"
+          echo "Verifying tar:"
           which tar
           tar --version
           pip install --upgrade pip setuptools wheel
           pip install cython buildozer
 
-      - name: Install Android SDK & Build Tools (includes AIDL)
+      - name: Install Android SDK and Build Tools
         run: |
+          export ANDROID_HOME=$HOME/android-sdk
           mkdir -p $ANDROID_HOME/cmdline-tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O sdk-tools.zip
           unzip sdk-tools.zip -d $ANDROID_HOME/cmdline-tools
           mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
 
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME --licenses
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+          export PATH=$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+          yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses
+          sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "platforms;android-33" "build-tools;33.0.2"
 
       - name: Build APK
         run: |
+          export ANDROID_HOME=$HOME/android-sdk
           export PATH=$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
           buildozer android debug
 
