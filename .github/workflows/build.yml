@@ -59,4 +59,3 @@ jobs:
         with:
           name: kivy-apk
           path: bin/*.apk
-
