@@ -70,14 +70,12 @@ jobs:
       - name: Install Python Dependencies
         run: |
           pip install --upgrade pip
-          pip install cython
-          pip install buildozer
+          pip install cython buildozer
 
-      - name: Initialize Buildozer Spec (if needed)
+      - name: Setup Buildozer Android
         run: |
-          if [ ! -f buildozer.spec ]; then
-            buildozer init
-          fi
+          buildozer android clean
+          buildozer android update
 
       - name: Build APK
         run: buildozer android debug
