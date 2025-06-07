@@ -9,47 +9,80 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    env:
-      ANDROID_HOME: $HOME/android-sdk
-      ANDROID_SDK_ROOT: $HOME/android-sdk
-      PATH: $HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools:$PATH
-
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: Install dependencies and Buildozer
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            openjdk-11-jdk \
-            python3-pip \
-            python3-setuptools \
-            python3-wheel \
+            build-essential \
             git \
             zip \
             unzip \
+            tar \
+            openjdk-17-jdk \
+            python3-pip \
             libffi-dev \
             libssl-dev \
-            python3-dev \
-            build-essential \
-            autoconf automake libtool pkg-config
-          pip3 install --upgrade pip
-          pip3 install buildozer cython
+            libsqlite3-dev \
+            zlib1g-dev \
+            libncurses5-dev \
+            libncursesw5-dev \
+            libreadline-dev \
+            libgdbm-dev \
+            libbz2-dev \
+            liblzma-dev \
+            libxml2-dev \
+            libxslt1-dev \
+            libjpeg-dev \
+            libfreetype6-dev \
+            libgl1-mesa-dev \
+            libegl1-mesa-dev \
+            libsdl2-dev \
+            libsdl2-image-dev \
+            libsdl2-mixer-dev \
+            libsdl2-ttf-dev \
+            libportmidi-dev \
+            libswscale-dev \
+            libavformat-dev \
+            libavcodec-dev \
+            libtiff5-dev \
+            libmtdev-dev \
+            xclip \
+            xsel \
+            libjpeg8-dev \
+            python3-virtualenv \
+            libtool \
+            automake \
+            autoconf \
+            cmake \
+            pkg-config \
+            curl \
+            libltdl-dev \
+            libffi-dev
 
-      - name: Setup Android SDK cmdline-tools
+          pip install --upgrade pip
+          pip install buildozer
+
+      - name: Initialize Buildozer Spec (if needed)
         run: |
-          mkdir -p $ANDROID_HOME/cmdline-tools
-          cd $ANDROID_HOME/cmdline-tools
-          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
-          unzip cmdline-tools.zip
-          rm cmdline-tools.zip
-          mv cmdline-tools latest
+          if [ ! -f buildozer.spec ]; then
+            buildozer init
+          fi
 
-      - name: Accept Android licenses and install SDK packages
-        run: |
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME --licenses
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.1.8937393" "cmdline-tools;latest" "ndk-bundle" "platforms;android-21" "extras;android;m2repository" "extras;google;m2repository"
-
-      - name: Run Buildozer build
+      - name: Build APK
         run: buildozer android debug
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: kivy-apk
+          path: bin/*.apk
+
