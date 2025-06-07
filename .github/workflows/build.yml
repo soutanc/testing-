@@ -9,6 +9,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      ANDROIDSDK: /usr/local/lib/android/sdk
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      PATH: /usr/local/lib/android/sdk/platform-tools:/usr/local/lib/android/sdk/cmdline-tools/latest/bin:$PATH
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -18,59 +23,41 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install System Dependencies
+      - name: Install System Packages
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
+          sudo apt update
+          sudo apt install -y \
             build-essential \
-            git \
-            zip \
-            unzip \
-            tar \
-            openjdk-17-jdk \
-            python3-pip \
-            libffi-dev \
-            libssl-dev \
-            libsqlite3-dev \
-            zlib1g-dev \
-            libncurses5-dev \
-            libncursesw5-dev \
-            libreadline-dev \
-            libgdbm-dev \
-            libbz2-dev \
-            liblzma-dev \
-            libxml2-dev \
-            libxslt1-dev \
-            libjpeg-dev \
-            libfreetype6-dev \
-            libgl1-mesa-dev \
-            libegl1-mesa-dev \
-            libsdl2-dev \
-            libsdl2-image-dev \
-            libsdl2-mixer-dev \
-            libsdl2-ttf-dev \
-            libportmidi-dev \
-            libswscale-dev \
-            libavformat-dev \
-            libavcodec-dev \
-            libtiff5-dev \
-            libmtdev-dev \
-            xclip \
-            xsel \
-            libjpeg8-dev \
-            python3-virtualenv \
+            ccache \
             libtool \
-            automake \
-            autoconf \
-            cmake \
             pkg-config \
-            curl \
-            libltdl-dev
+            openjdk-17-jdk \
+            zip unzip git \
+            python3-pip \
+            libffi-dev libssl-dev \
+            libncurses5-dev libsqlite3-dev \
+            libpng-dev libjpeg-dev libfreetype6-dev \
+            zlib1g-dev liblzma-dev \
+            libgl1-mesa-dev libgles2-mesa-dev \
+            libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
+            autoconf automake cmake \
+            xclip xsel libmtdev-dev
 
-      - name: Install Python Dependencies
+      - name: Install Python Packages
         run: |
           pip install --upgrade pip
           pip install cython buildozer
+
+      - name: Accept Android Licenses & Install SDK Tools
+        run: |
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          cd $ANDROID_HOME/cmdline-tools
+          curl -O https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q commandlinetools-linux-*.zip
+          mv cmdline-tools latest
+          yes | sdkmanager --licenses
+          sdkmanager --update
+          sdkmanager "platform-tools" "platforms;android-33" "build-tools;34.0.0" "cmdline-tools;latest" "ndk;25.2.9519653"
 
       - name: Initialize Buildozer (if needed)
         run: |
@@ -82,7 +69,7 @@ jobs:
         run: |
           buildozer android debug
 
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: kivy-apk
