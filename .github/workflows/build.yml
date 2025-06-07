@@ -72,13 +72,15 @@ jobs:
           pip install --upgrade pip
           pip install cython buildozer
 
-      - name: Setup Buildozer Android
+      - name: Initialize Buildozer (if needed)
         run: |
-          buildozer android clean
-          buildozer android update
+          if [ ! -f buildozer.spec ]; then
+            buildozer init
+          fi
 
       - name: Build APK
-        run: buildozer android debug
+        run: |
+          buildozer android debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
