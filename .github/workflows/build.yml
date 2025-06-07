@@ -26,29 +26,15 @@ jobs:
       - name: Install System Packages
         run: |
           sudo apt update
-          sudo apt install -y \
-            build-essential \
-            ccache \
-            libtool \
-            pkg-config \
-            openjdk-17-jdk \
-            zip unzip git \
-            python3-pip \
-            libffi-dev libssl-dev \
-            libncurses5-dev libsqlite3-dev \
-            libpng-dev libjpeg-dev libfreetype6-dev \
-            zlib1g-dev liblzma-dev \
-            libgl1-mesa-dev libgles2-mesa-dev \
-            libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
-            autoconf automake cmake \
-            xclip xsel libmtdev-dev
+          sudo apt install -y tar unzip zip curl openjdk-17-jdk build-essential python3-pip libffi-dev libssl-dev
+          sudo apt install -y libgl1-mesa-dev libgles2-mesa-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev
 
       - name: Install Python Packages
         run: |
           pip install --upgrade pip
           pip install cython buildozer
 
-      - name: Accept Android Licenses & Install SDK Tools
+      - name: Set up Android SDK
         run: |
           mkdir -p $ANDROID_HOME/cmdline-tools
           cd $ANDROID_HOME/cmdline-tools
@@ -59,18 +45,18 @@ jobs:
           sdkmanager --update
           sdkmanager "platform-tools" "platforms;android-33" "build-tools;34.0.0" "cmdline-tools;latest" "ndk;25.2.9519653"
 
-      - name: Initialize Buildozer (if needed)
+      - name: Init Buildozer (if needed)
         run: |
           if [ ! -f buildozer.spec ]; then
             buildozer init
           fi
 
       - name: Build APK
-        run: |
-          buildozer android debug
+        run: buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: kivy-apk
           path: bin/*.apk
+
