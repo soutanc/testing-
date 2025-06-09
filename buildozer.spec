@@ -1,11 +1,11 @@
 [app]
-title = SubscriptionApp
-package.name = subscriptionapp
-package.domain = org.soutanc
+title = Lions Den
+package.name = Lions Den
+package.domain = org.lionsden.app
 source.dir = .
-source.include_exts = py,kv
+source.include_exts = py,kv,dv
 version = 1.0
-requirements = python3,kivy
+requirements = python3,kivy,sqlite3
 orientation = portrait
 fullscreen = 0
 android.api = 33
